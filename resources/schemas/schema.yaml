@@ -1,0 +1,229 @@
+openapi: 3.0.0
+info:
+  description: "Документация API доски объявлений (тестовое задание в Тапир)"
+  version: "1.0.0"
+  title: "Доска объявлений"
+  termsOfService: "http://swagger.io/terms/"
+  contact:
+    email: "mihaershv@gmail.com"
+  license:
+    name: "Apache 2.0"
+    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
+tags:
+  - name: "Объявления"
+    description: "Методы для работы с объявлениями"
+paths:
+  /adverts:
+    get:
+      tags:
+        - Объявления
+      summary: Получить список всех объявлений
+      operationId: showAdverts
+      parameters:
+        - $ref: "#/components/parameters/field"
+        - $ref: "#/components/parameters/dir"
+        - $ref: "#/components/parameters/page"
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ResponseBody"
+                  - type: object
+                    properties:
+                      result:
+                        type: object
+                        properties:
+                          adverts:
+                            type: array
+                            items:
+                              $ref: "#/components/schemas/Advert"
+                          page:
+                            type: integer
+                          total:
+                            type: integer
+                          pages:
+                            type: integer
+                        required:
+                          - adverts
+                          - page
+                          - total
+                          - pages
+        422:
+          description: "Ошибка валидации"
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ResponseValidationErrorBody'
+        500:
+          description: Внутренняя ошибка сервера
+
+    post:
+      tags:
+        - Объявления
+      summary: Создать объявление
+      operationId: createAdvert
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                description:
+                  type: string
+                price:
+                  type: integer
+                images:
+                  type: array
+                  items:
+                    type: string
+
+              required:
+                - title
+                - description
+                - price
+                - images
+      responses:
+        200:
+          description: ОК
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ResponseBody'
+                  - type: object
+                    properties:
+                      result:
+                        type: object
+                        properties:
+                          id:
+                            type: integer
+                          success:
+                            type: boolean
+                        required:
+                          - id
+                          - success
+        422:
+          description: "Ошибка валидации"
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ResponseValidationErrorBody'
+        500:
+          description: "Внутренняя ошибка сервера"
+
+
+  /adverts/{advertId}:
+    get:
+      tags:
+        - Объявления
+      summary: Получить одно объявление
+      operationId: showAdvertById
+      parameters:
+        - name: advertId
+          in: path
+          description: ID объявления
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          description: ОК
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ResponseBody'
+                  - type: object
+                    properties:
+                      result:
+                        type: object
+                        properties:
+                          advert:
+                            $ref: '#/components/schemas/Advert'
+                        required:
+                          - advert
+                          - page
+                          - total
+                          - pages
+        404:
+          description: "Объявление не найдено"
+        500:
+          description: "Внутренняя ошибка сервера"
+
+components:
+  parameters:
+    field:
+      name: field
+      description: "Поле для сортировки"
+      in: query
+      required: false
+      schema:
+        type: string
+    dir:
+      name: dir
+      description: "Направление сортировки"
+      in: query
+      required: false
+      schema:
+        type: string
+        enum: ["asc", "desc"]
+    page:
+      name: page
+      description: "Страница пагинации"
+      in: query
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+
+  schemas:
+    ResponseBody:
+      type: object
+      properties:
+        result:
+          type: object
+        message:
+          type: string
+        errors:
+          type: object
+          description: "Имя поля - это название свойства, значение - описание ошибки"
+      required:
+        - result
+        - message
+        - errors
+
+    ResponseValidationErrorBody:
+      type: object
+      properties:
+        message:
+          type: string
+        errors:
+          type: object
+          example:
+            title:
+              - The title field is required.
+            page:
+              - The page field must be integer
+      required:
+        - result
+        - message
+        - errors
+
+    Advert:
+      type: object
+      properties:
+        title:
+          type: string
+        image:
+          type: string
+        price:
+          type: integer
+          format: int64
