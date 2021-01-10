@@ -35,7 +35,7 @@
                         <div class="pending-image-stub mr-2">
                             Loading
                         </div>
-                    @else
+                    @elseif ($image->status === \App\Models\Image::READY_STATUS)
                         <img src="{{ \App\Services\ImageService::getPublicPath($image) }}"
                              alt="Advert image"
                              class="image mr-2">

@@ -28,17 +28,47 @@ Laravel 8 - докеризированный через Sail с небольши
 
 Из корня проекта:  
 ```
-./vendor/bin/sail up
+./bin/sail up
+```
+Проверим:
+```
+docker-compose ps
+```
+Должны увидеть примерно такую картину:
+```
+         Name                        Command               State                       Ports                     
+-----------------------------------------------------------------------------------------------------------------
+tapirapi_laravel.test_1   start-container                  Up      0.0.0.0:80->80/tcp, 8000/tcp                  
+tapirapi_mailhog_1        MailHog                          Up      0.0.0.0:1025->1025/tcp, 0.0.0.0:8025->8025/tcp
+tapirapi_mysql_1          docker-entrypoint.sh mysqld      Up      0.0.0.0:3306->3306/tcp, 33060/tcp             
+tapirapi_redis_1          docker-entrypoint.sh redis ...   Up      0.0.0.0:6379->6379/tcp       
+```
+
+Заходим в контейнер, инсталлим все зависимости:
+```
+docker-compose exec laravel.test bash
+composer install
+```
+
+Копируем .env и генерим ключ:
+```
+cp .env.example .env
+php artisan key:generate
+```
+
+После:
+```
 sudo chmod -R 777 ./
 ```
 
-Ручная проверка статуса воркеров и запуск артизанов  
-Из корня:
+На этом этапе проект должен быть полностью работоспособным - `http://0.0.0.0` покажет список всех объявлений
+
+Для проверка статуса воркеров из контейнера прописываем:  
 ```
-docker-compose exec laravel.test bash
-
 supervisorctl status
-
+```
+Артизан (аналогично, из под контейнера):
+```
 php artisan adverts:show
 // or
 php artisan adverts:show {id}
@@ -47,7 +77,7 @@ php artisan adverts:show {id}
 ## Ссылки
 
 Swagger - `http://0.0.0.0/api/swagger`  
-Список объявлений -  `http://0.0.0.0`  
+Список объявлений - `http://0.0.0.0`  
 API - `http://0.0.0.0/api`  
 Telescope - `http://0.0.0.0/telescope`  
 
