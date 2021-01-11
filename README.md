@@ -50,10 +50,11 @@ docker-compose exec laravel.test bash
 composer install
 ```
 
-Копируем .env и генерим ключ:
+Копируем .env, генерим ключ, запускаем миграции:
 ```
 cp .env.example .env
 php artisan key:generate
+php artisan migrate
 ```
 
 После:
